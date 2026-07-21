@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte ATU </title>
+<link rel="stylesheet" href="atu.css">
+<style>
+/* ====================================
+   ESTILOS ESPECÍFICOS DE ATU.HTML
+   ==================================== */
+.codigo-box{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+}
+
+.codigo{
+    font-size:40px;
+    font-weight:bold;
+}
+
+.btn{
+    width:36px;
+    height:36px;
+    border:none;
+    border-radius:50%;
+    font-size:16px;
+    color:white;
+    background:#4169e1;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.btn:hover{
+    background:#3659d6;
+}
+
+.contador{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:15px;
+}
+
+.valor{
+    font-size:22px;
+    min-width:30px;
+    text-align:center;
+}
+
+.acciones{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.generar{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:#28a745;
+    color:white;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.generar:hover{
+    background:#218838;
+}
+
+.siguiente{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:#ff9800;
+    color:white;
+    font-size:15px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.siguiente:hover{
+    background:#e68900;
+}
+
+.estado{
+    text-align:center;
+    margin-top:10px;
+    color:#7CFF7C;
+    font-weight:bold;
+}
+
+.tipo-bus{
+    display:flex;
+    gap:10px;
+    margin-top:8px;
+}
+
+.tipo-btn{
+    flex:1;
+    padding:9px;
+    border:none;
+    border-radius:10px;
+    background:#2b2b2b;
+    color:white;
+    font-size:14px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.tipo-btn:hover{
+    background:#3a3a3a;
+}
+
+.tipo-btn.activo{
+    background:#4169e1;
+}
+
+.asientos-nota,
+.auto-nota{
+    text-align:center;
+    margin-top:6px;
+    font-size:12px;
+    color:#aaaaaa;
+}
+
+#nivel{
+    text-align:center;
+    margin-top:10px;
+    font-weight:bold;
+    font-size:18px;
+}
+
+#resultado{
+    width:100%;
+    height:260px;
+    margin-top:10px;
+    background:#1e1e1e;
+    color:white;
+    border:none;
+    border-radius:10px;
+    padding:10px;
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+<a href="atu.html" class="activo">📋 Reporte</a>
+<a href="vias.html" class="link">🛣️ Vías</a>
+<a href="Incidentes.html" class="link">⚠️ Incidentes</a>
+</div>
+
+<div class="cov-card">
+<span>👮 COV actual: <strong id="covNameLabel">Sin registrar</strong></span>
+<button onclick="mostrarModalCov()">Cambiar</button>
+</div>
+
+<div class="cov-modal" id="covModal">
+  <div class="cov-panel">
+    <h3>Registrar COV</h3>
+    <label for="covInput">Nombre del COV</label>
+    <input id="covInput" placeholder="Ej: Ari Hilasaca Jefferson">
+    <button onclick="guardarCovDesdeModal()">Guardar</button>
+  </div>
+</div>
+
+<h1>🚌 REPORTE ATU</h1>
+
+<div class="card">
+<label>🚍 TIPO DE BUS</label>
+<div class="tipo-bus">
+<button class="tipo-btn activo" id="btn405" onclick="elegirTipo('405')">405</button>
+<button class="tipo-btn" id="btnSE09" onclick="elegirTipo('SE09')">SE09</button>
+</div>
+<div class="asientos-nota" id="asientosNota">Asientos: 37</div>
+
+<label>🔢 SERVICIO</label>
+<input type="number" id="servicio" placeholder="Ej: 5">
+</div>
+
+<div class="card">
+<label>📊 CÓDIGO (AUTOMÁTICO SEGÚN ABORDAN)</label>
+<div class="codigo-box">
+<div class="codigo" id="codigo">01</div>
+</div>
+<div id="nivel">🟢 Vacío</div>
+<div class="auto-nota">El código se calcula solo, según cuántos usuarios ABORDAN y el tipo de bus</div>
+</div>
+
+<div class="card">
+<label>👥 CANTIDAD DE USUARIOS</label>
+<input type="number" id="usuarios" placeholder="0">
+
+<label>🅰️ ABORDAN</label>
+<input type="number" id="abordan" placeholder="0" oninput="actualizarCodigo()">
+
+<label>🕒 TIEMPO DE ESPERA (MIN)</label>
+<input type="number" id="espera" placeholder="0">
+</div>
+
+<div class="card">
+<div class="contador">
+<span>👩‍🦽 CONADIS</span>
+<div>
+<button class="btn" onclick="menos('conadis')">-</button>
+<span class="valor" id="conadis">0</span>
+<button class="btn" onclick="mas('conadis')">+</button>
+</div>
+</div>
+
+<div class="contador">
+<span>👮 PNP</span>
+<div>
+<button class="btn" onclick="menos('pnp')">-</button>
+<span class="valor" id="pnp">0</span>
+<button class="btn" onclick="mas('pnp')">+</button>
+</div>
+</div>
+
+<div class="contador">
+<span>👩‍🚒 BOMBEROS</span>
+<div>
+<button class="btn" onclick="menos('bomberos')">-</button>
+<span class="valor" id="bomberos">0</span>
+<button class="btn" onclick="mas('bomberos')">+</button>
+</div>
+</div>
+</div>
+
+<div class="acciones">
+<button class="generar" onclick="generarReporte()">
+📋 GENERAR Y COPIAR
+</button>
+<button class="siguiente" onclick="nuevoBus()">
+🚌 BUS SIGUIENTE
+</button>
+</div>
+
+<div class="estado" id="estado"></div>
+
+<textarea id="resultado"></textarea>
+
+<script>
+
+let codigo = 1;
+
+// Capacidad de asientos por tipo de bus
+const asientosPorTipo = {
+    "405": 37,
+    "SE09": 25
+};
+
+let tipoBus = "405";
+let asientos = asientosPorTipo[tipoBus];
+
+const niveles = {
+1:"🟢 Vacío",
+2:"🟢 Casi vacío",
+3:"🟡 Sentado 50%",
+4:"🟠 Sentado 100%",
+5:"🔴 Sentado + pasajeros de pie",
+6:"⚫ Lleno Full"
+};
+
+// Elegir tipo de bus (405 o SE09) y recalcular capacidad/código
+function elegirTipo(tipo){
+
+tipoBus = tipo;
+asientos = asientosPorTipo[tipo];
+
+document.getElementById("btn405").classList.remove("activo");
+document.getElementById("btnSE09").classList.remove("activo");
+
+if(tipo === "405"){
+    document.getElementById("btn405").classList.add("activo");
+} else {
+    document.getElementById("btnSE09").classList.add("activo");
+}
+
+document.getElementById("asientosNota").innerText =
+"Asientos: " + asientos;
+
+actualizarCodigo();
+}
+
+// Calcula el código según cuántos usuarios ABORDAN, en proporción
+// a la capacidad de asientos del bus (37 en el 405, 25 en el SE09)
+function calcularCodigo(abordan, asientosBus){
+
+if(abordan === 0){
+    return 1;
+}
+
+let ratio = abordan / asientosBus;
+
+// Umbrales proporcionales, tomando como referencia el bus 405 (37 asientos):
+// <=15/37 casi vacío, <=30/37 sentado 50%, <=100% sentado 100%,
+// <=40/37 sentado+pie, resto lleno full
+if(ratio <= 15/37){
+    return 2;
+}
+if(ratio <= 30/37){
+    return 3;
+}
+if(ratio <= 1){
+    return 4;
+}
+if(ratio <= 40/37){
+    return 5;
+}
+return 6;
+}
+
+const STORAGE_KEY = "atuCovNombre";
+
+function cargarCovNombre(){
+    const nombre = localStorage.getItem(STORAGE_KEY);
+    const label = document.getElementById("covNameLabel");
+    if(label){
+        label.innerText = nombre ? nombre : "Sin registrar";
+    }
+}
+
+function guardarCovNombre(nombre){
+    const valor = nombre.trim();
+    if(!valor){ return; }
+    localStorage.setItem(STORAGE_KEY, valor);
+    cargarCovNombre();
+}
+
+function mostrarModalCov(){
+    const modal = document.getElementById("covModal");
+    const input = document.getElementById("covInput");
+    if(modal){
+        modal.classList.add("show");
+    }
+    if(input){
+        input.value = localStorage.getItem(STORAGE_KEY) || "";
+        setTimeout(()=>input.focus(), 100);
+    }
+}
+
+function guardarCovDesdeModal(){
+    const input = document.getElementById("covInput");
+    if(input){
+        guardarCovNombre(input.value);
+    }
+    const modal = document.getElementById("covModal");
+    if(modal){
+        modal.classList.remove("show");
+    }
+}
+
+window.addEventListener("click", function(e){
+    const modal = document.getElementById("covModal");
+    if(modal && e.target === modal){
+        modal.classList.remove("show");
+    }
+});
+
+function actualizarCodigo(){
+
+let abordan =
+parseInt(document.getElementById("abordan").value) || 0;
+
+codigo = calcularCodigo(abordan, asientos);
+
+document.getElementById("codigo").innerText =
+codigo.toString().padStart(2,"0");
+
+document.getElementById("nivel").innerText =
+niveles[codigo];
+}
+
+function mas(id){
+let valor =
+parseInt(document.getElementById(id).innerText);
+
+document.getElementById(id).innerText =
+valor + 1;
+}
+
+function menos(id){
+let valor =
+parseInt(document.getElementById(id).innerText);
+
+if(valor > 0){
+    document.getElementById(id).innerText =
+    valor - 1;
+}
+}
+
+function generarReporte(){
+
+let usuarios =
+parseInt(document.getElementById("usuarios").value) || 0;
+
+let abordan =
+parseInt(document.getElementById("abordan").value) || 0;
+
+let quedan =
+usuarios - abordan;
+
+if(quedan < 0){
+    quedan = 0;
+}
+
+// Aseguramos que el código esté actualizado según lo que aborda
+codigo = calcularCodigo(abordan, asientos);
+document.getElementById("codigo").innerText =
+codigo.toString().padStart(2,"0");
+document.getElementById("nivel").innerText =
+niveles[codigo];
+
+let reporte =
+
+`🚏 PARADERO: CANAVAL Y MOREYRA
+🚌 CORREDOR: 412
+🚍 TIPO DE BUS: ${tipoBus}
+🔢 SERVICIO: ${document.getElementById("servicio").value}
+📊 CODIGO: ${codigo.toString().padStart(2,"0")}
+👨‍👨‍👧 CANT. USUARIOS: ${usuarios}
+🅰️ ABORDAN: ${abordan}
+👩🏻‍🤝‍👨🏻 QUEDAN EN PISO: ${quedan}
+👩‍🦽 CONADIS: ${document.getElementById("conadis").innerText}
+👮🏼‍♂️ PNP: ${document.getElementById("pnp").innerText}
+👩‍🚒 BOMBEROS: ${document.getElementById("bomberos").innerText}
+🕰 TIEMPO DE ESPERA: ${document.getElementById("espera").value} Minutos`;
+
+document.getElementById("resultado").value = reporte;
+
+navigator.clipboard.writeText(reporte);
+
+document.getElementById("estado").innerHTML =
+"✅ REPORTE COPIADO";
+}
+
+function nuevoBus(){
+
+let servicioActual =
+parseInt(document.getElementById("servicio").value) || 0;
+
+document.getElementById("servicio").value =
+servicioActual + 1;
+
+document.getElementById("usuarios").value = "";
+document.getElementById("abordan").value = "";
+document.getElementById("espera").value = "";
+
+document.getElementById("conadis").innerText = 0;
+document.getElementById("pnp").innerText = 0;
+document.getElementById("bomberos").innerText = 0;
+
+document.getElementById("resultado").value = "";
+document.getElementById("estado").innerHTML =
+"🚌 LISTO PARA EL SIGUIENTE BUS";
+
+codigo = 1;
+document.getElementById("codigo").innerText =
+codigo.toString().padStart(2,"0");
+document.getElementById("nivel").innerText =
+niveles[codigo];
+}
+
+actualizarCodigo();
+cargarCovNombre();
+
+if(!localStorage.getItem(STORAGE_KEY)){
+    mostrarModalCov();
+}
+
+</script>
+</body>
+</html>

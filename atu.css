@@ -1,0 +1,443 @@
+/* ====================================
+   ATU CSS - Estilos Centralizados
+   ====================================
+   
+   DISTRIBUCIÓN POR PÁGINA:
+   - atu.html: dashboard, cov-card, cov-modal, card, grid, btn
+   - Incidentes.html: dashboard, nav-tabs, container, form-grid, botones, oculto
+   - ocurrencias.html: dashboard, nav-tabs, card, grid, btn, type-switch, seccion-oculta
+   - vias.html: wrap, panel, select, textarea, grid
+   
+   COLORES UNIFICADOS:
+   - Fondo principal: #121212 (Negro oscuro)
+   - Elementos secundarios: #1e1e1e, #252525
+   - Texto: white, #cbd5e1, #cfcfcf
+   - Acentos: #4169e1, #ff9800, #4caf50, #f44336
+*/
+
+/* ====================================
+   RESET Y ESTILOS BASE
+   ==================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: #121212;
+    color: white;
+    padding: 15px;
+    min-height: 100vh;
+}
+
+/* ====================================
+   DASHBOARD - Usado en todos los HTML
+   ==================================== */
+.dashboard {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.dashboard a {
+    flex: 1;
+    min-width: 90px;
+    text-align: center;
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    background: #2b2b2b;
+    transition: 0.2s;
+}
+
+.dashboard a:hover {
+    background: #3a3a3a;
+}
+
+.dashboard a.activo {
+    background: #4169e1;
+}
+
+/* ====================================
+   NAVEGACIÓN TABS - Incidentes y Ocurrencias
+   ==================================== */
+.nav-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.nav-tabs a {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background: #2b2b2b;
+    transition: 0.2s;
+}
+
+.nav-tabs a:hover {
+    background: #3a3a3a;
+}
+
+.nav-tabs a.activo {
+    background: #ff9800;
+}
+
+/* ====================================
+   TARJETA COV - atu.html y ocurrencias.html
+   ==================================== */
+.cov-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.cov-card strong {
+    color: #7ec8ff;
+}
+
+.cov-card button,
+.cov-panel button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #4169e1;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.cov-card button:hover,
+.cov-panel button:hover {
+    background: #3659d6;
+}
+
+/* ====================================
+   MODAL COV - atu.html
+   ==================================== */
+.cov-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    z-index: 99;
+}
+
+.cov-modal.show {
+    display: flex;
+}
+
+.cov-panel {
+    width: min(320px, 100%);
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.cov-panel h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #38bdf8;
+}
+
+.cov-panel label {
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.cov-panel input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #2b2b2b;
+    color: white;
+    margin-bottom: 8px;
+}
+
+/* ====================================
+   TARJETAS - atu.html y ocurrencias.html
+   ==================================== */
+.card {
+    background: #1e1e1e;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+}
+
+.card h1 {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 22px;
+    color: #38bdf8;
+}
+
+.card p {
+    color: #cfcfcf;
+    line-height: 1.5;
+}
+
+/* ====================================
+   ETIQUETAS Y INPUTS - General
+   ==================================== */
+label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #2b2b2b;
+    color: white;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #666;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #38bdf8;
+    outline-offset: 0;
+}
+
+/* ====================================
+   GRILLAS - Distribuidas en varios archivos
+   ==================================== */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* ====================================
+   BOTONES - General
+   ==================================== */
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: #ff9800;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    margin-top: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn:hover {
+    background: #e68900;
+}
+
+.btn.secondary {
+    background: #4169e1;
+}
+
+.btn.secondary:hover {
+    background: #3659d6;
+}
+
+/* ====================================
+   BOTONES GRUPO - Incidentes.html
+   ==================================== */
+.botones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+button {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: scale(1.03);
+}
+
+#continuar,
+#generar {
+    background: #2563eb;
+}
+
+#continuar:hover,
+#generar:hover {
+    background: #1d50cc;
+}
+
+#copiar {
+    background: #16a34a;
+}
+
+#copiar:hover {
+    background: #12832b;
+}
+
+/* ====================================
+   CONTENEDOR - Incidentes.html
+   ==================================== */
+.container {
+    max-width: 500px;
+    margin: 30px auto;
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+}
+
+.container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #38bdf8;
+}
+
+/* ====================================
+   TEXTAREA - General
+   ==================================== */
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+#resultado {
+    height: 250px;
+    resize: none;
+    margin-top: 15px;
+    background: #111 !important;
+    color: #00ff66;
+}
+
+/* ====================================
+   OUTPUT - atu.html y ocurrencias.html
+   ==================================== */
+.output {
+    background: #0d1117;
+    border-radius: 8px;
+    padding: 12px;
+    white-space: pre-wrap;
+    color: #d7dde5;
+    min-height: 120px;
+}
+
+/* ====================================
+   SWITCH DE TIPOS - ocurrencias.html
+   ==================================== */
+.type-switch {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.type-switch button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #2b2b2b;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.type-switch button:hover {
+    background: #3a3a3a;
+}
+
+.type-switch button.activo {
+    background: #ff9800;
+}
+
+/* ====================================
+   SECCIONES OCULTAS - ocurrencias.html
+   ==================================== */
+.seccion-oculta {
+    display: none;
+}
+
+/* ====================================
+   UTILIDADES
+   ==================================== */
+.oculto {
+    display: none;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 22px;
+    color: #38bdf8;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #38bdf8;
+}
+
+/* ====================================
+   MEDIA QUERIES
+   ==================================== */
+@media (max-width: 600px) {
+    .form-grid,
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .botones {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        margin: 15px auto;
+        padding: 15px;
+    }
+}

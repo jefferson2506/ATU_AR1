@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Reporte de Vía</title>
+<link rel="stylesheet" href="atu.css">
+<style>
+/* ====================================
+   ESTILOS ESPECÍFICOS DE VIAS.HTML
+   ==================================== */
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+  body {
+    background: #121212 !important;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+  }
+
+  .header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+  }
+
+  .blip{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:#3ddc84;
+    box-shadow:0 0 0 4px rgba(61,220,132,0.15);
+    animation:pulse 2.2s infinite;
+    flex-shrink:0;
+  }
+
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 4px rgba(61,220,132,0.15);}
+    50%{box-shadow:0 0 0 8px rgba(61,220,132,0.06);}
+  }
+
+  .header h1{
+    font-family: 'JetBrains Mono', monospace;
+    font-size:15px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#6b7684;
+    margin:0;
+    font-weight:600;
+  }
+
+  .header h1 span{
+    color:#ffb454;
+  }
+
+  .panel{
+    background:#1e1e1e;
+    border:1px solid #2b2b2b;
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:16px;
+  }
+
+  .panel-title{
+    font-family: 'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:#ffb454;
+    margin:0 0 16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .panel-title::after{
+    content:'';
+    flex:1;
+    height:1px;
+    background:#2b2b2b;
+  }
+
+  .field{
+    margin-bottom:14px;
+  }
+
+  .field:last-child{
+    margin-bottom:0;
+  }
+
+  .field label{
+    display:block;
+    font-size:12px;
+    color:#888;
+    margin-bottom:6px;
+    font-weight:500;
+  }
+
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  input[type="text"], select{
+    width:100%;
+    background:#252525;
+    border:1px solid #2b2b2b;
+    color:white;
+    font-size:14px;
+    padding:10px 12px;
+    border-radius:7px;
+    appearance:none;
+    -webkit-appearance:none;
+    transition:border-color .15s;
+  }
+
+  select{
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7684' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    background-size:16px;
+    padding-right:34px;
+    cursor:pointer;
+  }
+
+  input[type="text"]:focus, select:focus{
+    outline:none;
+    border-color:#ffb454;
+  }
+
+  .via-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:12px;
+  }
+
+  .via-row:last-child{
+    margin-bottom:0;
+  }
+
+  .via-name{
+    flex:1;
+    font-size:13.5px;
+    color:#d7dde5;
+  }
+
+  .status-select{
+    width:180px;
+    flex-shrink:0;
+    font-weight:600;
+    font-size:13px;
+  }
+
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 2px;
+    border-bottom:1px solid #2b2b2b;
+  }
+
+  .toggle-row:last-child{
+    border-bottom:none;
+  }
+
+  .toggle-label{
+    font-size:13.5px;
+    color:#d7dde5;
+  }
+
+  .switch{
+    position:relative;
+    width:46px;
+    height:26px;
+    flex-shrink:0;
+  }
+
+  .switch input{
+    opacity:0;
+    width:0;
+    height:0;
+    position:absolute;
+  }
+
+  .slider{
+    position:absolute;
+    inset:0;
+    background:#2a323d;
+    border-radius:20px;
+    cursor:pointer;
+    transition:.2s;
+    border:1px solid #2b2b2b;
+  }
+
+  .slider::before{
+    content:'';
+    position:absolute;
+    width:18px;
+    height:18px;
+    left:3px;
+    top:3px;
+    background:#8b95a3;
+    border-radius:50%;
+    transition:.2s;
+  }
+
+  .switch input:checked + .slider{
+    background:rgba(61,220,132,0.18);
+    border-color:#3ddc84;
+  }
+
+  .switch input:checked + .slider::before{
+    transform:translateX(20px);
+    background:#3ddc84;
+  }
+
+  .generate-btn{
+    width:100%;
+    background:linear-gradient(180deg, #2a2118, #1a140d);
+    border:1px solid #7a5a2c;
+    color:#ffb454;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+    padding:12px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.15s;
+    margin-top:16px;
+  }
+
+  .generate-btn:hover{
+    background:linear-gradient(180deg, #35291a, #221a10);
+    border-color:#ffb454;
+    box-shadow:0 0 0 3px rgba(255,180,84,0.08);
+  }
+
+  .generate-btn:active{
+    transform:scale(0.99);
+  }
+
+  .output-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+
+  .output-head span{
+    font-family: 'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:#6b7684;
+  }
+
+  .copy-btn{
+    background:#252525;
+    border:1px solid #2b2b2b;
+    color:#6b7684;
+    font-family: 'JetBrains Mono', monospace;
+    font-size:11px;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:.15s;
+  }
+
+  .copy-btn:hover{
+    color:#ffb454;
+    border-color:#7a5a2c;
+  }
+
+  .copy-btn.copied{
+    color:#3ddc84;
+    border-color:#3ddc84;
+  }
+
+  .copy-btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+
+  .copy-btn:disabled:hover{
+    color:#6b7684;
+    border-color:#2b2b2b;
+  }
+
+  pre#output{
+    background:#0a0e13;
+    border:1px solid #2b2b2b;
+    border-radius:8px;
+    padding:16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size:13px;
+    line-height:1.65;
+    color:#d7dde5;
+    white-space:pre-wrap;
+    word-break:break-word;
+    margin:0;
+  }
+
+  .foot-note{
+    text-align:center;
+    font-size:11px;
+    color:#6b7684;
+    margin-top:18px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing:0.5px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="dashboard">
+    <a href="atu.html">📋 Reporte</a>
+    <a href="vias.html" class="activo">🛣️ Vías</a>
+    <a href="Incidentes.html">⚠️ Incidentes</a>
+  </div>
+
+  <div class="header">
+    <div class="blip"></div>
+    <h1>Panel de <span>Despacho</span> · Reporte de Vía</h1>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Ubicación</p>
+    <div class="row2">
+      <div class="field">
+        <label for="paradero">Paradero</label>
+        <input type="text" id="paradero" value="Canaval y Moreyra">
+      </div>
+      <div class="field">
+        <label for="sentido">Sentido</label>
+        <select id="sentido">
+          <option value="A">A</option>
+          <option value="B" selected>B</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Estado del tránsito</p>
+    <div class="via-row">
+      <span class="via-name">Av. Paseo de la República</span>
+      <select class="status-select" id="via1" onchange="colorSelect(this)">
+        <option value="FLUIDO">Fluido</option>
+        <option value="MODERADO">Moderado</option>
+        <option value="CARGADO/MODERADO">Cargado/Moderado</option>
+        <option value="CARGADO">Cargado</option>
+      </select>
+    </div>
+    <div class="via-row">
+      <span class="via-name">Av. Canaval y Moreyra / Av. Juan de Arona</span>
+      <select class="status-select" id="via2" onchange="colorSelect(this)">
+        <option value="FLUIDO">Fluido</option>
+        <option value="MODERADO">Moderado</option>
+        <option value="CARGADO/MODERADO">Cargado/Moderado</option>
+        <option value="CARGADO">Cargado</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p class="panel-title">Personal y apoyo</p>
+    <div class="toggle-row">
+      <span class="toggle-label">Semáforos operativos</span>
+      <label class="switch">
+        <input type="checkbox" id="semaforos" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Apoyo PNP de tránsito</span>
+      <label class="switch">
+        <input type="checkbox" id="pnp">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Personal de recaudo</span>
+      <label class="switch">
+        <input type="checkbox" id="recaudo">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Personal de despacho</span>
+      <label class="switch">
+        <input type="checkbox" id="despacho" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <button class="generate-btn" onclick="generarReporte()">▸ Generar Reporte</button>
+
+  <div class="panel" style="margin-top:16px;">
+    <div class="output-head">
+      <span>Reporte generado</span>
+      <button class="copy-btn" id="copyBtn" onclick="copiarReporte()" disabled>Copiar</button>
+    </div>
+    <pre id="output">Presiona "Generar Reporte" para verlo aquí.</pre>
+  </div>
+
+  <p class="foot-note">La fecha y hora se toman del reloj de este dispositivo</p>
+
+</div>
+
+<script>
+function colorSelect(sel){
+  sel.classList.remove('s-fluido','s-moderado','s-cargmod','s-cargado');
+  const map = {
+    'FLUIDO':'s-fluido',
+    'MODERADO':'s-moderado',
+    'CARGADO/MODERADO':'s-cargmod',
+    'CARGADO':'s-cargado'
+  };
+  sel.classList.add(map[sel.value]);
+}
+// init colors
+document.querySelectorAll('.status-select').forEach(colorSelect);
+
+function pad(n){return n.toString().padStart(2,'0');}
+
+function generarReporte(){
+  const paradero = document.getElementById('paradero').value.trim() || '—';
+  const sentido = document.getElementById('sentido').value;
+  const via1 = document.getElementById('via1').value;
+  const via2 = document.getElementById('via2').value;
+  const semaforos = document.getElementById('semaforos').checked;
+  const pnp = document.getElementById('pnp').checked;
+  const recaudo = document.getElementById('recaudo').checked;
+  const despacho = document.getElementById('despacho').checked;
+
+  const now = new Date();
+  const fecha = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+  const hora = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  const semaforosTxt = semaforos ? 'Si contamos con semáforos operativos.' : 'No contamos con semáforos operativos.';
+  const pnpTxt = pnp ? 'Si contamos con apoyo policial de tránsito.' : 'No contamos con apoyo policial de tránsito.';
+  const recaudoTxt = recaudo ? 'Si contamos con personal de recaudo' : 'No contamos con personal de recaudo';
+  const despachoTxt = despacho ? 'Si se cuenta con personal de Despacho.' : 'No se cuenta con personal de Despacho.';
+
+  const reporte =
+`🗳️ REPORTE DE VÍA
+🚏 PARADERO: ${paradero}
+🔁 SENTIDO: ${sentido}
+📆 FECHA: ${fecha}
+⏰ HORA: ${hora} hrs. 
+-------------------------------------
+
+🚧 TRÁNSITO:
+• Av. Paseo de la República:
+${via1} 
+
+• Av. Canaval y Moreyra / Av. Juan de Arona: 
+${via2} 
+
+🚦 SEMÁFOROS:
+${semaforosTxt}
+
+👮🏻‍♂️ APOYO PNP:
+${pnpTxt}
+
+${recaudoTxt} 
+
+${despachoTxt}
+
+📸 SE ADJUNTAN EVIDENCIAS:`;
+
+  document.getElementById('output').textContent = reporte;
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.disabled = false;
+  document.getElementById('output').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function copiarReporte(){
+  const text = document.getElementById('output').textContent;
+  const btn = document.getElementById('copyBtn');
+
+  function marcarCopiado(){
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar'; btn.classList.remove('copied');}, 1800);
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(marcarCopiado).catch(copiarConFallback);
+  } else {
+    copiarConFallback();
+  }
+
+  function copiarConFallback(){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+      document.execCommand('copy');
+      marcarCopiado();
+    } catch (err) {
+      btn.textContent = 'Error al copiar';
+      setTimeout(()=>{btn.textContent='Copiar';}, 1800);
+    }
+    document.body.removeChild(ta);
+  }
+}
+</script>
+</body>
+</html>
