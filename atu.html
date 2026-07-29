@@ -149,6 +149,30 @@
     border-radius:10px;
     padding:10px;
 }
+
+.config-toggle{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:10px 12px;
+    border:none;
+    border-radius:10px;
+    background:#2b2b2b;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    margin-bottom:10px;
+}
+
+.config-toggle:hover{
+    background:#3a3a3a;
+}
+
+.configuracion-adicional.oculto{
+    display:none;
+}
 </style>
 </head>
 <body>
@@ -208,6 +232,12 @@
 </div>
 
 <div class="card">
+<button class="config-toggle" type="button" onclick="toggleConfiguracionAdicional()">
+<span>⚙️ CONFIGURACIÓN ADICIONAL</span>
+<span id="configToggleIcon">▸</span>
+</button>
+
+<div id="configuracionAdicional" class="configuracion-adicional oculto">
 <div class="contador">
 <span>👩‍🦽 CONADIS</span>
 <div>
@@ -232,6 +262,7 @@
 <button class="btn" onclick="menos('bomberos')">-</button>
 <span class="valor" id="bomberos">0</span>
 <button class="btn" onclick="mas('bomberos')">+</button>
+</div>
 </div>
 </div>
 </div>
@@ -381,6 +412,16 @@ document.getElementById("nivel").innerText =
 niveles[codigo];
 }
 
+function toggleConfiguracionAdicional(){
+const panel = document.getElementById("configuracionAdicional");
+const icon = document.getElementById("configToggleIcon");
+
+if(!panel || !icon){ return; }
+
+panel.classList.toggle("oculto");
+icon.innerText = panel.classList.contains("oculto") ? "▸" : "▾";
+}
+
 function mas(id){
 let valor =
 parseInt(document.getElementById(id).innerText);
@@ -421,12 +462,14 @@ codigo.toString().padStart(2,"0");
 document.getElementById("nivel").innerText =
 niveles[codigo];
 
+let servicio = document.getElementById("servicio").value;
+let espera = document.getElementById("espera").value;
+
 let reporte =
 
 `🚏 PARADERO: CANAVAL Y MOREYRA
-🚌 CORREDOR: 412
-🚍 TIPO DE BUS: ${tipoBus}
-🔢 SERVICIO: ${document.getElementById("servicio").value}
+🚌 CORREDOR:${tipoBus}
+🔢 SERVICIO: ${servicio}
 📊 CODIGO: ${codigo.toString().padStart(2,"0")}
 👨‍👨‍👧 CANT. USUARIOS: ${usuarios}
 🅰️ ABORDAN: ${abordan}
@@ -434,7 +477,7 @@ let reporte =
 👩‍🦽 CONADIS: ${document.getElementById("conadis").innerText}
 👮🏼‍♂️ PNP: ${document.getElementById("pnp").innerText}
 👩‍🚒 BOMBEROS: ${document.getElementById("bomberos").innerText}
-🕰 TIEMPO DE ESPERA: ${document.getElementById("espera").value} Minutos`;
+🕰 TIEMPO DE ESPERA: ${espera} Minutos`;
 
 document.getElementById("resultado").value = reporte;
 
@@ -473,6 +516,7 @@ niveles[codigo];
 
 actualizarCodigo();
 cargarCovNombre();
+toggleConfiguracionAdicional();
 
 if(!localStorage.getItem(STORAGE_KEY)){
     mostrarModalCov();
