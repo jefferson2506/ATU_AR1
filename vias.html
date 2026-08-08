@@ -337,7 +337,12 @@
     <div class="row2">
       <div class="field">
         <label for="paradero">Paradero</label>
-        <input type="text" id="paradero" value="Canaval y Moreyra">
+        <select id="paradero" onchange="actualizarFormulario()">
+          <option value="CANAVAL Y MOREYRA" selected>Canaval y Moreyra</option>
+          <option value="ALCAZAR">ALCÁZAR</option>
+          <option value="MOQUEGUA">MOQUEGUA</option>
+          <option value="ICA">ICA</option>
+        </select>
       </div>
       <div class="field">
         <label for="sentido">Sentido</label>
@@ -352,7 +357,7 @@
   <div class="panel">
     <p class="panel-title">Estado del tránsito</p>
     <div class="via-row">
-      <span class="via-name">Av. Paseo de la República</span>
+      <span class="via-name" id="via1Label">Av. Paseo de la República</span>
       <select class="status-select" id="via1" onchange="colorSelect(this)">
         <option value="FLUIDO">Fluido</option>
         <option value="MODERADO">Moderado</option>
@@ -361,7 +366,7 @@
       </select>
     </div>
     <div class="via-row">
-      <span class="via-name">Av. Canaval y Moreyra / Av. Juan de Arona</span>
+      <span class="via-name" id="via2Label">Av. Canaval y Moreyra / Av. Juan de Arona</span>
       <select class="status-select" id="via2" onchange="colorSelect(this)">
         <option value="FLUIDO">Fluido</option>
         <option value="MODERADO">Moderado</option>
@@ -387,14 +392,21 @@
         <span class="slider"></span>
       </label>
     </div>
-    <div class="toggle-row">
-      <span class="toggle-label">Personal de recaudo</span>
+    <div class="toggle-row" id="covRow" style="display:none;">
+      <span class="toggle-label">Personal COV ATU en el punto</span>
       <label class="switch">
-        <input type="checkbox" id="recaudo">
+        <input type="checkbox" id="cov" checked>
         <span class="slider"></span>
       </label>
     </div>
     <div class="toggle-row">
+      <span class="toggle-label">Personal de recaudo</span>
+      <label class="switch">
+        <input type="checkbox" id="recaudo" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row" id="despachoRow">
       <span class="toggle-label">Personal de despacho</span>
       <label class="switch">
         <input type="checkbox" id="despacho" checked>
@@ -418,6 +430,16 @@
 </div>
 
 <script>
+// Paraderos que comparten el formato "similar" (Lado A / Lado B + COV ATU)
+const PARADEROS_SIMILARES = ["ALCAZAR", "MOQUEGUA", "ICA"];
+
+const PARADERO_TEXTOS = {
+  "CANAVAL Y MOREYRA": "Canaval y Moreyra",
+  "ALCAZAR": "ALCÁZAR",
+  "MOQUEGUA": "MOQUEGUA",
+  "ICA": "ICA"
+};
+
 function colorSelect(sel){
   sel.classList.remove('s-fluido','s-moderado','s-cargmod','s-cargado');
   const map = {
@@ -433,26 +455,84 @@ document.querySelectorAll('.status-select').forEach(colorSelect);
 
 function pad(n){return n.toString().padStart(2,'0');}
 
+// Ajusta las etiquetas del formulario según el paradero elegido
+function actualizarFormulario(){
+  const paraderoValue = document.getElementById('paradero').value;
+  const esSimilar = PARADEROS_SIMILARES.includes(paraderoValue);
+
+  const via1Label = document.getElementById('via1Label');
+  const via2Label = document.getElementById('via2Label');
+  const covRow = document.getElementById('covRow');
+  const despachoRow = document.getElementById('despachoRow');
+
+  if(esSimilar){
+    via1Label.textContent = 'Lado A';
+    via2Label.textContent = 'Lado B';
+    covRow.style.display = 'flex';
+    despachoRow.style.display = 'none';
+  } else {
+    via1Label.textContent = 'Av. Paseo de la República';
+    via2Label.textContent = 'Av. Canaval y Moreyra / Av. Juan de Arona';
+    covRow.style.display = 'none';
+    despachoRow.style.display = 'flex';
+  }
+}
+
 function generarReporte(){
-  const paradero = document.getElementById('paradero').value.trim() || '—';
+  const paraderoValue = document.getElementById('paradero').value;
+  const paradero = PARADERO_TEXTOS[paraderoValue] || paraderoValue;
   const sentido = document.getElementById('sentido').value;
   const via1 = document.getElementById('via1').value;
   const via2 = document.getElementById('via2').value;
   const semaforos = document.getElementById('semaforos').checked;
   const pnp = document.getElementById('pnp').checked;
   const recaudo = document.getElementById('recaudo').checked;
-  const despacho = document.getElementById('despacho').checked;
 
   const now = new Date();
   const fecha = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
   const hora = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
-  const semaforosTxt = semaforos ? 'Si contamos con semáforos operativos.' : 'No contamos con semáforos operativos.';
-  const pnpTxt = pnp ? 'Si contamos con apoyo policial de tránsito.' : 'No contamos con apoyo policial de tránsito.';
-  const recaudoTxt = recaudo ? 'Si contamos con personal de recaudo' : 'No contamos con personal de recaudo';
-  const despachoTxt = despacho ? 'Si se cuenta con personal de Despacho.' : 'No se cuenta con personal de Despacho.';
+  let reporte;
 
-  const reporte =
+  if(PARADEROS_SIMILARES.includes(paraderoValue)){
+    // Formato para ALCÁZAR / MOQUEGUA / ICA
+    const cov = document.getElementById('cov').checked;
+
+    const semaforosTxt = semaforos ? 'Contamos con semáforos operativos.' : 'No contamos con semáforos operativos.';
+    const pnpTxt = pnp ? 'Contamos con presencia policial.' : 'No contamos con presencia policial.';
+    const covTxt = cov ? 'Contamos con personal Cov en el punto.' : 'No contamos con personal Cov en el punto.';
+    const recaudoTxt = recaudo ? 'Contamos con personal de recaudo.' : 'No contamos con personal de recaudo.';
+
+    reporte =
+`REPORTE DE VÍA
+🚏 PARADERO: ${paradero} 
+🔁 SENTIDO: ${sentido}
+📆 FECHA: ${fecha} 
+⏰ HORA: ${hora} hrs
+------------------------------
+🚧 TRÁNSITO:
+Lado A: ${via1} 
+Lado B: ${via2} 
+🚦SEMÁFOROS:
+${semaforosTxt}
+👮🏻‍♂APOYO PNP: 
+${pnpTxt}
+👮COV ATU:
+${covTxt}
+👩‍✈️RECAUDO:
+${recaudoTxt}
+SE ADJUNTAN EVIDENCIAS:`;
+
+  } else {
+    // Formato original para Canaval y Moreyra (sin cambios)
+    const despacho = document.getElementById('despacho').checked;
+
+    const semaforosTxt = semaforos ? 'Si contamos con semáforos operativos.' : 'No contamos con semáforos operativos.';
+    const pnpTxt = pnp ? 'Si contamos con apoyo policial de tránsito.' : 'No contamos con apoyo policial de tránsito.';
+    const recaudoTxt = recaudo ? 'Si contamos con personal de recaudo' : 'No contamos con personal de recaudo';
+    const despachoTxt = despacho ? 'Si se cuenta con personal de Despacho.' : 'No se cuenta con personal de Despacho.';
+
+    reporte =
 `🗳️ REPORTE DE VÍA
 🚏 PARADERO: ${paradero}
 🔁 SENTIDO: ${sentido}
@@ -478,6 +558,7 @@ ${recaudoTxt}
 ${despachoTxt}
 
 📸 SE ADJUNTAN EVIDENCIAS:`;
+  }
 
   document.getElementById('output').textContent = reporte;
   const copyBtn = document.getElementById('copyBtn');
@@ -519,6 +600,9 @@ function copiarReporte(){
     document.body.removeChild(ta);
   }
 }
+
+// Estado inicial del formulario
+actualizarFormulario();
 </script>
 </body>
 </html>

@@ -16,6 +16,85 @@
     gap:15px;
 }
 
+.codigo-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+}
+
+.codigo-title{
+    margin:0;
+}
+
+.switch{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.switch input{
+    display:none;
+}
+
+.slider{
+    position:relative;
+    width:46px;
+    height:24px;
+    border-radius:999px;
+    background:#555;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.slider::before{
+    content:"";
+    position:absolute;
+    left:3px;
+    top:3px;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:white;
+    transition:0.2s;
+}
+
+.switch input:checked + .slider{
+    background:#28a745;
+}
+
+.switch input:checked + .slider::before{
+    transform:translateX(22px);
+}
+
+.switch-text{
+    font-size:12px;
+    font-weight:bold;
+    color:#cfcfcf;
+}
+
+.codigo-nav{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    font-size:18px;
+    padding:0;
+}
+
+.codigo-nav:disabled{
+    opacity:0.45;
+    cursor:not-allowed;
+    transform:none;
+}
+
+.codigo-hint{
+    font-size:12px;
+    color:#aaaaaa;
+    text-align:center;
+    margin-top:6px;
+}
+
 .codigo{
     font-size:40px;
     font-weight:bold;
@@ -173,6 +252,16 @@
 .configuracion-adicional.oculto{
     display:none;
 }
+
+.corredor-fijo{
+    display:flex;
+    gap:10px;
+    margin-top:8px;
+}
+
+.corredor-fijo .tipo-btn{
+    cursor:default;
+}
 </style>
 </head>
 <body>
@@ -200,24 +289,45 @@
 <h1>🚌 REPORTE ATU</h1>
 
 <div class="card">
-<label>🚍 TIPO DE BUS</label>
-<div class="tipo-bus">
+<label>� PARADERO</label>
+<select id="paradero" onchange="actualizarCorredor()">
+<option value="CANAVAL Y MOREYRA">CANAVAL Y MOREYRA</option>
+<option value="MOQUEGUA">MOQUEGUA</option>
+<option value="ALCAZAR">ALCAZAR</option>
+</select>
+
+<label>🚍 CORREDOR</label>
+<div class="tipo-bus" id="tipoBusButtons">
 <button class="tipo-btn activo" id="btn405" onclick="elegirTipo('405')">405</button>
 <button class="tipo-btn" id="btnSE09" onclick="elegirTipo('SE09')">SE09</button>
 </div>
+<div class="corredor-fijo" id="corredorFijo412" style="display:none;">
+<button class="tipo-btn activo" type="button" disabled>412</button>
+</div>
 <div class="asientos-nota" id="asientosNota">Asientos: 37</div>
+<div class="auto-nota" id="corredorNota">Corredor actual: 405</div>
 
 <label>🔢 SERVICIO</label>
 <input type="number" id="servicio" placeholder="Ej: 5">
 </div>
 
 <div class="card">
-<label>📊 CÓDIGO (AUTOMÁTICO SEGÚN ABORDAN)</label>
-<div class="codigo-box">
+<div class="codigo-header">
+<label class="codigo-title">📊 CÓDIGO (AUTOMÁTICO SEGÚN ABORDAN)</label>
+<label class="switch">
+<input type="checkbox" id="modoAutomatico" checked onchange="toggleModoAutomatico()">
+<span class="slider"></span>
+<span class="switch-text" id="switchText">AUTO</span>
+</label>
+</div>
+<div class="codigo-box" id="codigoBox">
+<button class="btn codigo-nav" id="btnCodigoAnterior" onclick="cambiarCodigo(-1)" type="button" aria-label="Código anterior">◀</button>
 <div class="codigo" id="codigo">01</div>
+<button class="btn codigo-nav" id="btnCodigoSiguiente" onclick="cambiarCodigo(1)" type="button" aria-label="Código siguiente">▶</button>
 </div>
 <div id="nivel">🟢 Vacío</div>
-<div class="auto-nota">El código se calcula solo, según cuántos usuarios ABORDAN y el tipo de bus</div>
+<div class="auto-nota" id="modoNota">Modo automático activado: el código cambia según abordan.</div>
+<div class="codigo-hint">Activa el modo manual para cambiar el código con los botones o deslizando.</div>
 </div>
 
 <div class="card">
@@ -283,6 +393,7 @@
 <script>
 
 let codigo = 1;
+let modoAutomatico = true;
 
 // Capacidad de asientos por tipo de bus
 const asientosPorTipo = {
@@ -292,6 +403,7 @@ const asientosPorTipo = {
 
 let tipoBus = "405";
 let asientos = asientosPorTipo[tipoBus];
+let paradero = "CANAVAL Y MOREYRA";
 
 const niveles = {
 1:"🟢 Vacío",
@@ -320,7 +432,46 @@ if(tipo === "405"){
 document.getElementById("asientosNota").innerText =
 "Asientos: " + asientos;
 
+actualizarCorredor();
 actualizarCodigo();
+}
+
+function getCorredorActual(){
+    const paraderoSelect = document.getElementById("paradero");
+    paradero = paraderoSelect ? paraderoSelect.value : paradero;
+
+    if(paradero === "MOQUEGUA" || paradero === "ALCAZAR"){
+        return "412";
+    }
+
+    return tipoBus;
+}
+
+function actualizarCorredor(){
+    const corredor = getCorredorActual();
+    const nota = document.getElementById("corredorNota");
+    const btn405 = document.getElementById("btn405");
+    const btnSE09 = document.getElementById("btnSE09");
+    const tipoBusButtons = document.getElementById("tipoBusButtons");
+    const corredorFijo412 = document.getElementById("corredorFijo412");
+
+    if(nota){
+        nota.innerText = "Corredor actual: " + corredor;
+    }
+
+    const esCorridorFijo = paradero === "MOQUEGUA" || paradero === "ALCAZAR";
+
+    if(tipoBusButtons && corredorFijo412){
+        tipoBusButtons.style.display = esCorridorFijo ? "none" : "flex";
+        corredorFijo412.style.display = esCorridorFijo ? "flex" : "none";
+    }
+
+    if(btn405 && btnSE09){
+        btn405.disabled = esCorridorFijo;
+        btnSE09.disabled = esCorridorFijo;
+        btn405.classList.toggle("activo", !esCorridorFijo && tipoBus === "405");
+        btnSE09.classList.toggle("activo", !esCorridorFijo && tipoBus === "SE09");
+    }
 }
 
 // Calcula el código según cuántos usuarios ABORDAN, en proporción
@@ -398,18 +549,89 @@ window.addEventListener("click", function(e){
     }
 });
 
+function renderCodigo(){
+    document.getElementById("codigo").innerText =
+    codigo.toString().padStart(2,"0");
+
+    document.getElementById("nivel").innerText =
+    niveles[codigo] || niveles[1];
+
+    const switchInput = document.getElementById("modoAutomatico");
+    const switchText = document.getElementById("switchText");
+    const btnAnterior = document.getElementById("btnCodigoAnterior");
+    const btnSiguiente = document.getElementById("btnCodigoSiguiente");
+    const notaModo = document.getElementById("modoNota");
+
+    if(switchInput){
+        switchInput.checked = modoAutomatico;
+    }
+
+    if(switchText){
+        switchText.innerText = modoAutomatico ? "AUTO" : "MANUAL";
+    }
+
+    if(btnAnterior && btnSiguiente){
+        btnAnterior.disabled = modoAutomatico;
+        btnSiguiente.disabled = modoAutomatico;
+    }
+
+    if(notaModo){
+        notaModo.innerText = modoAutomatico
+            ? "Modo automático activado: el código cambia según abordan."
+            : "Modo manual activado: usa los botones o desliza para cambiar el código.";
+    }
+}
+
 function actualizarCodigo(){
 
 let abordan =
 parseInt(document.getElementById("abordan").value) || 0;
 
-codigo = calcularCodigo(abordan, asientos);
+if(modoAutomatico){
+    codigo = calcularCodigo(abordan, asientos);
+}
 
-document.getElementById("codigo").innerText =
-codigo.toString().padStart(2,"0");
+renderCodigo();
+}
 
-document.getElementById("nivel").innerText =
-niveles[codigo];
+function toggleModoAutomatico(){
+    const switchInput = document.getElementById("modoAutomatico");
+    modoAutomatico = switchInput ? switchInput.checked : true;
+
+    if(modoAutomatico){
+        actualizarCodigo();
+    } else {
+        renderCodigo();
+    }
+}
+
+function cambiarCodigo(direccion){
+    if(modoAutomatico){ return; }
+
+    codigo = Math.max(1, Math.min(6, codigo + direccion));
+    renderCodigo();
+}
+
+function configurarDeslizamientoCodigo(){
+    const codigoBox = document.getElementById("codigoBox");
+    if(!codigoBox){ return; }
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    codigoBox.addEventListener("touchstart", (event)=>{
+        touchStartX = event.changedTouches[0].screenX;
+    }, {passive:true});
+
+    codigoBox.addEventListener("touchend", (event)=>{
+        touchEndX = event.changedTouches[0].screenX;
+        const diferencia = touchEndX - touchStartX;
+
+        if(Math.abs(diferencia) < 50){ return; }
+        if(!modoAutomatico){
+            cambiarCodigo(diferencia < 0 ? 1 : -1);
+        }
+    }, {passive:true});
 }
 
 function toggleConfiguracionAdicional(){
@@ -456,19 +678,18 @@ if(quedan < 0){
 }
 
 // Aseguramos que el código esté actualizado según lo que aborda
-codigo = calcularCodigo(abordan, asientos);
-document.getElementById("codigo").innerText =
-codigo.toString().padStart(2,"0");
-document.getElementById("nivel").innerText =
-niveles[codigo];
+if(modoAutomatico){
+    codigo = calcularCodigo(abordan, asientos);
+}
+renderCodigo();
 
 let servicio = document.getElementById("servicio").value;
 let espera = document.getElementById("espera").value;
 
 let reporte =
 
-`🚏 PARADERO: CANAVAL Y MOREYRA
-🚌 CORREDOR:${tipoBus}
+`🚏 PARADERO: ${paradero}
+🚌 CORREDOR: ${getCorredorActual()}
 🔢 SERVICIO: ${servicio}
 📊 CODIGO: ${codigo.toString().padStart(2,"0")}
 👨‍👨‍👧 CANT. USUARIOS: ${usuarios}
@@ -508,15 +729,14 @@ document.getElementById("estado").innerHTML =
 "🚌 LISTO PARA EL SIGUIENTE BUS";
 
 codigo = 1;
-document.getElementById("codigo").innerText =
-codigo.toString().padStart(2,"0");
-document.getElementById("nivel").innerText =
-niveles[codigo];
+renderCodigo();
 }
 
+actualizarCorredor();
 actualizarCodigo();
 cargarCovNombre();
 toggleConfiguracionAdicional();
+configurarDeslizamientoCodigo();
 
 if(!localStorage.getItem(STORAGE_KEY)){
     mostrarModalCov();
