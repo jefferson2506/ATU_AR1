@@ -1,1 +1,381 @@
-/* Styles base shared by all pages: copied from atu.css */
+/* ====================================
+   ESTILOS ESPECÍFICOS DE atu.html
+   ==================================== */
+
+body {
+  background: #10151c;
+  color: #eef6ff;
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+.dashboard {
+  background: transparent;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dashboard a {
+  background: #262b33;
+  color: #eaf3ff;
+  border-radius: 12px;
+  border: 1px solid #39414d;
+  padding: 10px 14px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.dashboard a.activo {
+  background: #4169e1;
+  color: #ffffff;
+  border-color: #86abff;
+  box-shadow: 0 0 0 2px rgba(65,105,225,0.16);
+}
+
+.cov-card {
+  background: #151b22;
+  color: #d5e9ff;
+  border-radius: 14px;
+  border: 1px solid #2a3544;
+  padding: 12px 14px;
+  margin: 0 0 14px;
+}
+
+.cov-card strong {
+  color: #9be7b1;
+}
+
+.cov-card button {
+  background: #385df7;
+  color: #fff;
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(26px, 4vw, 40px);
+  color: #e9f2ff;
+  letter-spacing: 2px;
+  text-align: left;
+  margin: 12px 0 16px;
+  border-bottom: 1px solid #344253;
+  padding-bottom: 8px;
+}
+
+.card {
+  background: linear-gradient(180deg, #202733 0%, #141a23 100%);
+  border: 1px solid #333c49;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.22);
+}
+
+.card label,
+.card .codigo-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 900;
+  color: #e8eef9;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.card select,
+.card input[type="number"],
+.card input[type="text"] {
+  background: #111722;
+  color: #eef6ff;
+  border: 1px solid #586479;
+  border-radius: 10px;
+  padding: 11px 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.card select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23eaf3ff' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.tipo-bus {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 8px 0 8px;
+}
+
+.tipo-btn {
+  min-width: 78px;
+  background: #343b47;
+  color: #eef6ff;
+  border-radius: 12px;
+  border: 1px solid #596372;
+  padding: 11px 16px;
+  font-size: 16px;
+  font-weight: 900;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: none;
+}
+
+.tipo-btn.activo {
+  background: linear-gradient(135deg, #4170ff, #6c77ff);
+  color: #fff;
+  border-color: #99b7ff;
+  box-shadow: 0 0 0 2px rgba(137,148,255,0.2);
+}
+
+.corredor-fijo {
+  display: none;
+}
+
+.asientos-nota,
+.auto-nota {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #b8c3d9;
+  margin: 10px 0 0;
+}
+
+.asientos-nota {
+  color: #dce9ff;
+}
+
+.auto-nota {
+  color: #c8d2e9;
+}
+
+.card .codigo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.card .codigo-header .codigo-title {
+  margin: 0;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.slider {
+  position: relative;
+  width: 50px;
+  height: 24px;
+  border-radius: 50px;
+  background: #354154;
+  border: 1px solid #586479;
+  display: inline-block;
+}
+
+.slider::before {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 2px;
+  top: 1px;
+  border-radius: 50%;
+  background: #dde8ff;
+  transition: 0.2s ease;
+}
+
+.switch input:checked + .slider {
+  background: #1bbf74;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(25px);
+  background: #ffffff;
+}
+
+.switch-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #9af1bb;
+  font-weight: 900;
+}
+
+.codigo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: #111722;
+  border-radius: 12px;
+  border: 1px solid #455272;
+  padding: 14px 10px;
+}
+
+.codigo {
+  min-width: 80px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(40px, 6vw, 56px);
+  font-weight: 900;
+  color: #ffe7ad;
+  background: #202b3f;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.codigo-nav {
+  width: 54px;
+  min-width: 54px;
+  background: #385df7;
+  color: #fff;
+  border-radius: 50%;
+  padding: 12px 14px;
+  font-size: 20px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+#nivel {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #9af1bb;
+  margin-top: 10px;
+}
+
+.codigo-hint {
+  font-size: 11px;
+  color: #9aa4b9;
+  font-style: italic;
+}
+
+.card .contador {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.card .contador span {
+  color: #eaf3ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card .contador div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card .contador .valor {
+  min-width: 30px;
+  text-align: center;
+  border-radius: 8px;
+  background: #111722;
+  padding: 6px;
+  font-weight: 800;
+}
+
+.card .contador button,
+.config-toggle {
+  background: #384154;
+  color: #eef6ff;
+  border-radius: 10px;
+  border: 1px solid #596372;
+  padding: 8px 12px;
+}
+
+.config-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.configuracion-adicional {
+  margin-top: 14px;
+}
+
+.acciones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.acciones .generar,
+.acciones .siguiente {
+  flex: 1;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 900;
+  color: #eef6ff;
+}
+
+.acciones .generar {
+  background: #285af8;
+}
+
+.acciones .siguiente {
+  background: #ff9d42;
+}
+
+#resultado {
+  background: #0c1118;
+  color: #b9ffd5;
+  border-radius: 12px;
+  border: 1px solid #35415b;
+}
+
+@media screen and (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .dashboard {
+    flex-wrap: wrap;
+  }
+
+  .dashboard a {
+    flex: 1 1 30%;
+  }
+
+  .card {
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .tipo-bus {
+    flex-wrap: wrap;
+  }
+
+  .tipo-btn {
+    flex: 1 1 45%;
+  }
+
+  .codigo-box {
+    justify-content: space-between;
+  }
+
+  .acciones {
+    flex-direction: column;
+  }
+}
