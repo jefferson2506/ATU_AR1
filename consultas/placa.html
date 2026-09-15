@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Buscador de Placas</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+*{
+    box-sizing: border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f2f2f2;
+    padding:20px;
+}
+
+.contenedor{
+    max-width:800px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.15);
+}
+
+h1{
+    text-align:center;
+}
+
+.btn-nav{
+    display:block;
+    width:100%;
+    max-width:280px;
+    margin:12px auto;
+    padding:12px;
+    background:#0066cc;
+    color:#fff;
+    border-radius:8px;
+    text-align:center;
+    font-weight:bold;
+    text-decoration:none;
+    box-sizing:border-box;
+}
+
+#buscador{
+    width:100%;
+    padding:15px;
+    font-size:18px;
+    border:2px solid #ccc;
+    border-radius:10px;
+    text-transform:uppercase;
+    outline:none;
+}
+
+#buscador:focus{
+    border-color:#007bff;
+}
+
+#resultados{
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+}
+
+.boton-placa{
+    border:none;
+    padding:15px 8px;
+    border-radius:10px;
+    background:#007bff;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.boton-placa:hover{
+    background:#0056b3;
+}
+
+.boton-placa:active{
+    transform:scale(0.95);
+}
+
+#mensaje{
+    margin-top:20px;
+    padding:12px;
+    text-align:center;
+    background:#d4edda;
+    color:#155724;
+    border-radius:8px;
+    display:none;
+}
+
+.estado-cargando{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.estado-ok{
+    background:#d4edda;
+    color:#155724;
+}
+
+.estado-error{
+    background:#f8d7da;
+    color:#721c24;
+}
+
+#estado {
+    margin-top:10px;
+    padding:10px;
+    text-align:center;
+    font-weight:bold;
+    border-radius:8px;
+}
+
+.sin-resultados{
+    grid-column:1 / -1;
+    text-align:center;
+    padding:20px;
+}
+
+@media(max-width:600px){
+    #resultados{
+        grid-template-columns:repeat(2, 1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<h1> Buscador de Placas</h1>
+
+<a class="btn-nav" href="conductor.html">IR A CONDUCTOR</a>
+
+<div id="estado" class="estado-cargando">
+    ? Cargando conductor.xlsx ...
+</div>
+
+<input
+    type="text"
+    id="buscador"
+    placeholder="Buscar placa..."
+    disabled
+>
+
+<div id="resultados"></div>
+
+<div id="mensaje"></div>
+
+</div>
+
+<script>
+
+let placas = [];
+
+const buscador = document.getElementById("buscador");
+const resultados = document.getElementById("resultados");
+const mensaje = document.getElementById("mensaje");
+const estado = document.getElementById("estado");
+
+function mostrarEstado(tipo, texto){
+    estado.className = tipo === "ok" ? "estado-ok" : tipo === "error" ? "estado-error" : "estado-cargando";
+    estado.innerHTML = texto;
+}
+
+function leerPlacasDesdeExcel(buffer){
+
+    const datos = new Uint8Array(buffer);
+
+    const libro = XLSX.read(datos, {
+        type: "array"
+    });
+
+    const nombreHoja = libro.SheetNames[0];
+
+    const hoja = libro.Sheets[nombreHoja];
+
+    const filas = XLSX.utils.sheet_to_json(
+        hoja,
+        {
+            header: 1
+        }
+    );
+
+    placas = [];
+
+    filas.forEach(function(fila){
+
+        if(fila[3]){
+
+            const placa = String(fila[3])
+                .trim()
+                .toUpperCase();
+
+            if(!placas.includes(placa)){
+                placas.push(placa);
+            }
+
+        }
+
+    });
+
+    buscador.disabled = false;
+
+    mostrarEstado("ok", "? conductor.xlsx cargado correctamente � " + placas.length + " placas");
+
+    mostrarPlacas(placas);
+
+}
+
+function cargarConductorXlsx(){
+
+    fetch("conductor.xlsx")
+        .then(function(respuesta){
+
+            if(!respuesta.ok){
+                throw new Error("No se encontr� conductor.xlsx (HTTP " + respuesta.status + ")");
+            }
+
+            return respuesta.arrayBuffer();
+
+        })
+        .then(function(buffer){
+
+            leerPlacasDesdeExcel(buffer);
+
+        })
+        .catch(function(error){
+
+            mostrarEstado("error", "? No se pudo cargar conductor.xlsx autom�ticamente");
+            mensaje.innerHTML = "No se pudo cargar conductor.xlsx autom�ticamente. Verifica que est� en la misma carpeta.";
+            mensaje.style.display = "block";
+            console.log(error);
+
+        });
+
+}
+
+window.addEventListener("load", cargarConductorXlsx);
+
+buscador.addEventListener("input", function(){
+
+    const texto = buscador.value
+        .toUpperCase()
+        .trim();
+
+    const filtradas = placas.filter(function(placa){
+
+        return placa.includes(texto);
+
+    });
+
+    mostrarPlacas(filtradas);
+
+});
+
+function mostrarPlacas(lista){
+
+    resultados.innerHTML = "";
+
+    if(lista.length === 0){
+
+        resultados.innerHTML = `
+            <div class="sin-resultados">
+                ? No se encontr� ninguna placa
+            </div>
+        `;
+
+        return;
+
+    }
+
+    lista.forEach(function(placa){
+
+        const boton = document.createElement("button");
+
+        boton.className = "boton-placa";
+
+        boton.textContent = placa;
+
+        boton.addEventListener("click", function(){
+
+            copiarPlaca(placa);
+
+        });
+
+        resultados.appendChild(boton);
+
+    });
+
+}
+
+function copiarPlaca(placa){
+
+    if(navigator.clipboard){
+
+        navigator.clipboard.writeText(placa)
+            .then(function(){
+                mensaje.innerHTML = "? <b>" + placa + "</b> copiada";
+                mensaje.style.display = "block";
+                setTimeout(function(){ mensaje.style.display = "none"; }, 2000);
+            })
+            .catch(function(){
+                fallbackCopy(placa);
+            });
+
+    } else {
+
+        fallbackCopy(placa);
+
+    }
+
+}
+
+function fallbackCopy(placa){
+
+    const textarea = document.createElement("textarea");
+    textarea.value = placa;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    textarea.remove();
+
+    mensaje.innerHTML = "? <b>" + placa + "</b> copiada";
+    mensaje.style.display = "block";
+
+    setTimeout(function(){
+        mensaje.style.display = "none";
+    }, 2000);
+
+}
+
+</script>
+
+</body>
+</html>

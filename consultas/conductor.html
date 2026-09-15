@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Buscador de Conductores</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f4f4;
+    margin:0;
+    padding:20px;
+}
+
+h2{
+    text-align:center;
+    color:#0066cc;
+}
+
+.btn-nav{
+    display:block;
+    width:100%;
+    max-width:280px;
+    margin:12px auto;
+    padding:12px;
+    background:#0066cc;
+    color:#fff;
+    border-radius:8px;
+    text-align:center;
+    font-weight:bold;
+    text-decoration:none;
+    box-sizing:border-box;
+}
+
+input[type=file],
+input[type=text]{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    font-size:18px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+}
+
+.card{
+    background:#fff;
+    padding:12px;
+    margin-top:10px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,.15);
+}
+
+.codigo{
+    color:#0066cc;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.nombre{
+    font-size:18px;
+    margin-top:5px;
+}
+
+.card div{
+    margin-bottom:5px;
+}
+
+.btn-copiar{
+    margin-top:8px;
+    padding:10px 15px;
+    background:#0066cc;
+    color:white;
+    border:none;
+    border-radius:7px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.btn-copiar:active{
+    transform:scale(.97);
+}
+
+.btn-copiar.copiado{
+    background:#28a745;
+}
+
+#resultado{
+    margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>BUSCADOR DE CONDUCTORES</h2>
+
+<a class="btn-nav" href="placa.html">🚗 IR A BUSCADOR DE PLACAS</a>
+
+<!-- Cargar Excel -->
+<input 
+    type="file" 
+    id="excel" 
+    accept=".xlsx"
+>
+
+<!-- Buscador -->
+<input 
+    type="text" 
+    id="buscar" 
+    placeholder="Buscar por código o nombre..."
+    disabled
+>
+
+<!-- Resultados -->
+<div id="resultado"></div>
+
+
+<script>
+
+let datos = [];
+
+function cargarDatosDesdeExcel(buffer, origen){
+
+    try {
+
+        const data = new Uint8Array(buffer);
+
+        const libro = XLSX.read(data, {
+            type: "array"
+        });
+
+        const hoja = libro.Sheets[libro.SheetNames[0]];
+
+        datos = XLSX.utils.sheet_to_json(hoja, {
+            header: 1
+        });
+
+        if(datos.length > 0 && datos[0][0] && datos[0][0].toString().toLowerCase().includes("cod")){
+            datos.shift();
+        }
+
+        document.getElementById("buscar").disabled = false;
+
+        if(origen === "manual"){
+            alert("Excel cargado correctamente");
+        }
+
+    } catch (e) {
+
+        alert("Error al leer el Excel: " + e.message);
+
+    }
+
+}
+
+
+// ================================
+// CARGAR EXCEL
+// ================================
+
+document.getElementById("excel").addEventListener("change", function(e){
+
+    const archivo = e.target.files[0];
+
+    if(!archivo) return;
+
+    const lector = new FileReader();
+
+    lector.onload = function(ev){
+
+        cargarDatosDesdeExcel(ev.target.result, "manual");
+
+    };
+
+    lector.readAsArrayBuffer(archivo);
+
+});
+
+window.addEventListener("load", function(){
+
+    fetch("conductor.xlsx")
+        .then(function(respuesta){
+            if(!respuesta.ok){
+                throw new Error("No se encontró conductor.xlsx (HTTP " + respuesta.status + ")");
+            }
+            return respuesta.arrayBuffer();
+        })
+        .then(function(buffer){
+            cargarDatosDesdeExcel(buffer, "automático");
+        })
+        .catch(function(error){
+            alert("No se pudo cargar conductor.xlsx automáticamente. Cargue el archivo manualmente.");
+            console.log(error);
+        });
+
+});
+
+
+// ================================
+// BUSCAR
+// ================================
+
+document.getElementById("buscar").addEventListener("input", function(){
+
+    let texto = this.value.toUpperCase().trim();
+
+    let html = "";
+
+    if(texto === ""){
+
+        document.getElementById("resultado").innerHTML = "";
+
+        return;
+
+    }
+
+    let encontrados = 0;
+
+
+    for(let i = 0; i < datos.length; i++){
+
+        let codigo = (datos[i][0] || "").toString();
+
+        let nombre = (datos[i][1] || "").toString().toUpperCase();
+
+        let dni = (datos[i][2] || "").toString();
+
+
+        if(
+            codigo.toUpperCase().includes(texto) ||
+            nombre.includes(texto)
+        ){
+
+            html += `
+                <div class="card">
+
+                    <div class="codigo">
+                        ${codigo}
+                    </div>
+
+                    <div class="nombre">
+                        ${nombre}
+                    </div>
+
+                    <div>
+                        <b>DNI:</b> ${dni}
+                    </div>
+
+                    <button 
+                        class="btn-copiar"
+                        onclick="copiarCodigo('${codigo.replace(/'/g, "\\'")}', this)"
+                    >
+                        📋 COPIAR CÓDIGO
+                    </button>
+
+                </div>
+            `;
+
+            encontrados++;
+
+            // Máximo 30 resultados
+            if(encontrados >= 30) break;
+
+        }
+
+    }
+
+
+    if(html === ""){
+
+        html = `
+            <center>
+                <h3>No se encontraron resultados</h3>
+            </center>
+        `;
+
+    }
+
+
+    document.getElementById("resultado").innerHTML = html;
+
+});
+
+
+// ================================
+// COPIAR SOLO EL CÓDIGO
+// ================================
+
+function copiarCodigo(codigo, boton){
+
+    navigator.clipboard.writeText(codigo).then(function(){
+
+        boton.innerHTML = "✅ COPIADO";
+
+        boton.classList.add("copiado");
+
+
+        setTimeout(function(){
+
+            boton.innerHTML = "📋 COPIAR CÓDIGO";
+
+            boton.classList.remove("copiado");
+
+        }, 1500);
+
+
+    }).catch(function(){
+
+        alert("No se pudo copiar el código");
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
