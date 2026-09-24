@@ -6,109 +6,23 @@
 
 <title>Buscador de Conductores</title>
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<style>
-
-body{
-    font-family:Arial,sans-serif;
-    background:#f4f4f4;
-    margin:0;
-    padding:20px;
-}
-
-h2{
-    text-align:center;
-    color:#0066cc;
-}
-
-.btn-nav{
-    display:block;
-    width:100%;
-    max-width:280px;
-    margin:12px auto;
-    padding:12px;
-    background:#0066cc;
-    color:#fff;
-    border-radius:8px;
-    text-align:center;
-    font-weight:bold;
-    text-decoration:none;
-    box-sizing:border-box;
-}
-
-input[type=file],
-input[type=text]{
-    width:100%;
-    padding:12px;
-    margin:10px 0;
-    font-size:18px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    box-sizing:border-box;
-}
-
-.card{
-    background:#fff;
-    padding:12px;
-    margin-top:10px;
-    border-radius:10px;
-    box-shadow:0 2px 5px rgba(0,0,0,.15);
-}
-
-.codigo{
-    color:#0066cc;
-    font-size:20px;
-    font-weight:bold;
-}
-
-.nombre{
-    font-size:18px;
-    margin-top:5px;
-}
-
-.card div{
-    margin-bottom:5px;
-}
-
-.btn-copiar{
-    margin-top:8px;
-    padding:10px 15px;
-    background:#0066cc;
-    color:white;
-    border:none;
-    border-radius:7px;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.btn-copiar:active{
-    transform:scale(.97);
-}
-
-.btn-copiar.copiado{
-    background:#28a745;
-}
-
-#resultado{
-    margin-top:10px;
-}
-
-</style>
-
 </head>
 
-<body>
+<body class="bg-dark text-light p-3">
 
-<h2>BUSCADOR DE CONDUCTORES</h2>
+<main class="container bg-dark border border-secondary p-4 rounded shadow-sm">
 
-<a class="btn-nav" href="placa.html">🚗 IR A BUSCADOR DE PLACAS</a>
+<h2 class="text-center text-info mb-3">BUSCADOR DE CONDUCTORES</h2>
+
+<a class="btn btn-info text-dark d-block mb-3 fw-bold" href="placa.html">IR A BUSCADOR DE PLACAS</a>
 
 <!-- Cargar Excel -->
 <input 
     type="file" 
     id="excel" 
+    class="form-control form-control-lg bg-dark text-white border-secondary mb-3"
     accept=".xlsx"
 >
 
@@ -116,12 +30,15 @@ input[type=text]{
 <input 
     type="text" 
     id="buscar" 
+    class="form-control form-control-lg bg-dark text-white border-secondary mb-3"
     placeholder="Buscar por código o nombre..."
     disabled
 >
 
 <!-- Resultados -->
-<div id="resultado"></div>
+<div id="resultado" class="mt-2"></div>
+
+</main>
 
 
 <script>
@@ -241,27 +158,29 @@ document.getElementById("buscar").addEventListener("input", function(){
         ){
 
             html += `
-                <div class="card">
+                <div class="card bg-dark text-white border-secondary shadow-sm mb-3">
+                    <div class="card-body">
 
-                    <div class="codigo">
+                    <div class="text-info fs-4 fw-bold">
                         ${codigo}
                     </div>
 
-                    <div class="nombre">
+                    <div class="fs-5 mt-1">
                         ${nombre}
                     </div>
 
-                    <div>
+                    <div class="mt-2">
                         <b>DNI:</b> ${dni}
                     </div>
 
                     <button 
-                        class="btn-copiar"
+                        class="btn btn-info text-dark mt-2 fw-bold"
                         onclick="copiarCodigo('${codigo.replace(/'/g, "\\'")}', this)"
                     >
-                        📋 COPIAR CÓDIGO
+                        COPIAR CÓDIGO
                     </button>
 
+                    </div>
                 </div>
             `;
 
@@ -278,9 +197,9 @@ document.getElementById("buscar").addEventListener("input", function(){
     if(html === ""){
 
         html = `
-            <center>
-                <h3>No se encontraron resultados</h3>
-            </center>
+            <div class="alert alert-info text-center">
+                No se encontraron resultados
+            </div>
         `;
 
     }
@@ -299,16 +218,18 @@ function copiarCodigo(codigo, boton){
 
     navigator.clipboard.writeText(codigo).then(function(){
 
-        boton.innerHTML = "✅ COPIADO";
+        boton.innerHTML = "COPIADO";
 
-        boton.classList.add("copiado");
+        boton.classList.remove("btn-info", "text-dark");
+        boton.classList.add("btn-success");
 
 
         setTimeout(function(){
 
-            boton.innerHTML = "📋 COPIAR CÓDIGO";
+            boton.innerHTML = "COPIAR CÓDIGO";
 
-            boton.classList.remove("copiado");
+            boton.classList.remove("btn-success");
+            boton.classList.add("btn-info", "text-dark");
 
         }, 1500);
 

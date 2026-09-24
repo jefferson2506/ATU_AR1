@@ -1,347 +1,984 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-<title>Buscador de Placas</title>
+    <title>Buscador de placas</title>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<style>
-*{
-    box-sizing: border-box;
-}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#f2f2f2;
-    padding:20px;
-}
+    <style>
 
-.contenedor{
-    max-width:800px;
-    margin:auto;
-    background:white;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.15);
-}
+        /* ==============================
+           CUADRÍCULA DE RESULTADOS
+           SIEMPRE 3 COLUMNAS
+           ============================== */
 
-h1{
-    text-align:center;
-}
+        .results-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+        }
 
-.btn-nav{
-    display:block;
-    width:100%;
-    max-width:280px;
-    margin:12px auto;
-    padding:12px;
-    background:#0066cc;
-    color:#fff;
-    border-radius:8px;
-    text-align:center;
-    font-weight:bold;
-    text-decoration:none;
-    box-sizing:border-box;
-}
+        /* Cada placa */
 
-#buscador{
-    width:100%;
-    padding:15px;
-    font-size:18px;
-    border:2px solid #ccc;
-    border-radius:10px;
-    text-transform:uppercase;
-    outline:none;
-}
+        .result-btn {
+            width: 100%;
+            min-width: 0;
+            min-height: 65px;
 
-#buscador:focus{
-    border-color:#007bff;
-}
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-#resultados{
-    margin-top:20px;
-    display:grid;
-    grid-template-columns:repeat(4, 1fr);
-    gap:10px;
-}
+            font-size: 16px;
+            font-weight: bold;
 
-.boton-placa{
-    border:none;
-    padding:15px 8px;
-    border-radius:10px;
-    background:#007bff;
-    color:white;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-}
+            border-radius: 8px;
+            border: none;
 
-.boton-placa:hover{
-    background:#0056b3;
-}
+            padding: 10px 5px;
 
-.boton-placa:active{
-    transform:scale(0.95);
-}
+            word-break: break-word;
+        }
 
-#mensaje{
-    margin-top:20px;
-    padding:12px;
-    text-align:center;
-    background:#d4edda;
-    color:#155724;
-    border-radius:8px;
-    display:none;
-}
+        /* En celulares también mantiene 3 columnas */
 
-.estado-cargando{
-    background:#fff3cd;
-    color:#856404;
-}
+        @media (max-width: 576px) {
 
-.estado-ok{
-    background:#d4edda;
-    color:#155724;
-}
+            .results-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
 
-.estado-error{
-    background:#f8d7da;
-    color:#721c24;
-}
+            .result-btn {
+                min-height: 55px;
+                font-size: 13px;
+                padding: 8px 3px;
+            }
 
-#estado {
-    margin-top:10px;
-    padding:10px;
-    text-align:center;
-    font-weight:bold;
-    border-radius:8px;
-}
+        }
 
-.sin-resultados{
-    grid-column:1 / -1;
-    text-align:center;
-    padding:20px;
-}
+        /* Mensaje cuando no hay resultados */
 
-@media(max-width:600px){
-    #resultados{
-        grid-template-columns:repeat(2, 1fr);
-    }
-}
-</style>
+        .empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+        }
+
+    </style>
+
 </head>
 
-<body>
 
-<div class="contenedor">
+<body class="bg-dark text-light">
 
-<h1> Buscador de Placas</h1>
 
-<a class="btn-nav" href="conductor.html">IR A CONDUCTOR</a>
+<header class="container py-4">
 
-<div id="estado" class="estado-cargando">
-    ? Cargando conductor.xlsx ...
+    <h1 class="text-info fw-bold">
+        BUSCADOR DE PLACAS
+    </h1>
+
+    <p class="text-light mb-0">
+        Carga tu Excel y busca por número o por placa
+    </p>
+
+</header>
+
+
+<main class="container bg-dark border border-secondary p-4 rounded shadow-sm d-flex flex-column gap-3">
+
+
+    <!-- BOTÓN PARA IR AL BUSCADOR DE CONDUCTORES -->
+
+    <a class="btn btn-info text-dark fw-bold"
+       href="conductor.html">
+
+        IR A BUSCADOR DE CONDUCTORES
+
+    </a>
+
+
+    <!-- CARGAR EXCEL -->
+
+    <div class="card bg-dark text-light border-secondary p-3">
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+
+            <label class="btn btn-info text-dark fw-bold"
+                   for="fileInput">
+
+                ELEGIR EXCEL
+
+            </label>
+
+            <input
+                class="visually-hidden"
+                type="file"
+                id="fileInput"
+                accept=".xlsx,.xls,.csv">
+
+
+            <select
+                class="form-select bg-dark text-light border-secondary w-auto"
+                id="sheetSelect">
+
+            </select>
+
+        </div>
+
+
+        <div class="text-white-50 small mt-2"
+             id="fileStatus">
+
+            Cargando conductor.xlsx...
+
+        </div>
+
+
+        <div class="text-white-50 small mt-1"
+             id="statRow">
+
+        </div>
+
+    </div>
+
+
+    <!-- BUSCADOR -->
+
+    <div class="card bg-dark text-light border-secondary p-3">
+
+        <div>
+
+            <input
+                class="form-control form-control-lg bg-dark text-light border-secondary"
+                type="text"
+                id="searchInput"
+                placeholder="Escribe un número o una placa..."
+                autocomplete="off"
+                disabled>
+
+        </div>
+
+
+        <div class="text-white-50 small mt-2">
+
+            Toca una placa para copiar su información.
+
+        </div>
+
+    </div>
+
+
+    <!-- RESULTADOS -->
+
+    <div
+        class="text-info fw-bold"
+        id="resultsLabel"
+        style="display:none;">
+
+        Resultados
+
+    </div>
+
+
+    <!-- AQUÍ APARECEN LAS PLACAS -->
+
+    <div
+        class="results-grid row row-cols-3 g-2"
+        id="results">
+
+    </div>
+
+
+</main>
+
+
+<!-- MENSAJE DE COPIADO -->
+
+<div
+    class="toast position-fixed bottom-0 start-50 translate-middle-x mb-3 bg-info text-dark"
+    id="toast">
+
 </div>
 
-<input
-    type="text"
-    id="buscador"
-    placeholder="Buscar placa..."
-    disabled
->
 
-<div id="resultados"></div>
-
-<div id="mensaje"></div>
-
-</div>
 
 <script>
 
-let placas = [];
+(function() {
 
-const buscador = document.getElementById("buscador");
-const resultados = document.getElementById("resultados");
-const mensaje = document.getElementById("mensaje");
-const estado = document.getElementById("estado");
 
-function mostrarEstado(tipo, texto){
-    estado.className = tipo === "ok" ? "estado-ok" : tipo === "error" ? "estado-error" : "estado-cargando";
-    estado.innerHTML = texto;
-}
+    const fileInput =
+        document.getElementById('fileInput');
 
-function leerPlacasDesdeExcel(buffer){
+    const sheetSelect =
+        document.getElementById('sheetSelect');
 
-    const datos = new Uint8Array(buffer);
+    const fileStatus =
+        document.getElementById('fileStatus');
 
-    const libro = XLSX.read(datos, {
-        type: "array"
-    });
+    const statRow =
+        document.getElementById('statRow');
 
-    const nombreHoja = libro.SheetNames[0];
+    const searchInput =
+        document.getElementById('searchInput');
 
-    const hoja = libro.Sheets[nombreHoja];
+    const resultsEl =
+        document.getElementById('results');
 
-    const filas = XLSX.utils.sheet_to_json(
-        hoja,
-        {
-            header: 1
+    const resultsLabel =
+        document.getElementById('resultsLabel');
+
+    const toast =
+        document.getElementById('toast');
+
+
+    let workbook = null;
+
+    let records = [];
+
+
+
+    /* ==============================
+       MOSTRAR MENSAJE
+       ============================== */
+
+    function showToast(msg) {
+
+        toast.textContent = msg;
+
+        toast.classList.add('show');
+
+        clearTimeout(showToast._t);
+
+        showToast._t = setTimeout(() => {
+
+            toast.classList.remove('show');
+
+        }, 1400);
+
+    }
+
+
+
+    /* ==============================
+       COPIAR TEXTO
+       ============================== */
+
+    function copyText(text) {
+
+        try {
+
+            if (
+                navigator.clipboard &&
+                navigator.clipboard.writeText
+            ) {
+
+                navigator.clipboard.writeText(text);
+
+            } else {
+
+                const ta =
+                    document.createElement('textarea');
+
+                ta.value = text;
+
+                ta.style.position = 'fixed';
+
+                ta.style.opacity = '0';
+
+                document.body.appendChild(ta);
+
+                ta.select();
+
+                document.execCommand('copy');
+
+                document.body.removeChild(ta);
+
+            }
+
+            showToast('Copiado: ' + text);
+
+        } catch (e) {
+
+            showToast('No se pudo copiar');
+
+        }
+
+    }
+
+
+
+    /* ==============================
+       FORMATEAR BÚSQUEDA
+       ============================== */
+
+    function formatPlateInput(value) {
+
+        let cleaned =
+            value
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '');
+
+
+        if (/^\d+$/.test(cleaned)) {
+
+            return cleaned;
+
+        }
+
+
+        if (cleaned.length > 3) {
+
+            return (
+                cleaned.slice(0, 3) +
+                '-' +
+                cleaned.slice(3, 7)
+            );
+
+        }
+
+
+        return cleaned;
+
+    }
+
+
+
+    /* ==============================
+       FORMATEAR PLACA
+       ============================== */
+
+    function formatearPlaca(valor) {
+
+        const caracteres =
+            String(valor)
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '');
+
+
+        if (caracteres.length < 6) {
+
+            return caracteres;
+
+        }
+
+
+        return (
+            caracteres.slice(0, 3) +
+            '-' +
+            caracteres.slice(-3)
+        );
+
+    }
+
+
+
+    /* ==============================
+       CARGAR HOJA DE EXCEL
+       ============================== */
+
+    function loadSheet(sheetName) {
+
+        const ws =
+            workbook.Sheets[sheetName];
+
+
+        let rows =
+            XLSX.utils.sheet_to_json(
+                ws,
+                { header: 1 }
+            );
+
+
+        /* Quitar encabezado */
+
+        if (
+            rows.length > 0 &&
+            rows[0][0] &&
+            rows[0][0]
+                .toString()
+                .toLowerCase()
+                .includes('cod')
+        ) {
+
+            rows.shift();
+
+        }
+
+
+        records = [];
+
+
+        const vistos = new Set();
+
+
+        /* Recorrer registros */
+
+        for (const row of rows) {
+
+
+            /*
+             Columna D = PLACA
+             Columna E = NÚMERO
+            */
+
+
+            if (
+                !row ||
+                row.length < 4 ||
+                !row[3]
+            ) {
+
+                continue;
+
+            }
+
+
+            const plate =
+                formatearPlaca(row[3]);
+
+
+            if (!plate) {
+
+                continue;
+
+            }
+
+
+            let num = '';
+
+
+            if (
+                row[4] !== undefined &&
+                row[4] !== null &&
+                String(row[4]).trim() !== ''
+            ) {
+
+                const candidato =
+                    String(row[4]).trim();
+
+
+                if (/\d/.test(candidato)) {
+
+                    num = candidato;
+
+                }
+
+            }
+
+
+            const clave =
+                plate + '|' + num;
+
+
+            if (vistos.has(clave)) {
+
+                continue;
+
+            }
+
+
+            vistos.add(clave);
+
+
+            records.push({
+
+                num: num,
+
+                plate: plate
+
+            });
+
+        }
+
+
+        statRow.textContent =
+            records.length +
+            ' placas cargadas de la hoja "' +
+            sheetName +
+            '"';
+
+
+        searchInput.disabled =
+            records.length === 0;
+
+
+        searchInput.value = '';
+
+
+        renderResults('');
+
+    }
+
+
+
+    /* ==============================
+       PROCESAR EXCEL
+       ============================== */
+
+    function procesarWorkbook(
+        data,
+        nombreArchivo
+    ) {
+
+        workbook =
+            XLSX.read(
+                data,
+                { type: 'array' }
+            );
+
+
+        fileStatus.textContent =
+            'Archivo: ' +
+            nombreArchivo;
+
+
+        sheetSelect.innerHTML = '';
+
+
+        workbook.SheetNames.forEach(name => {
+
+            const opt =
+                document.createElement('option');
+
+
+            opt.value = name;
+
+            opt.textContent = name;
+
+
+            sheetSelect.appendChild(opt);
+
+        });
+
+
+        sheetSelect.style.display =
+            workbook.SheetNames.length > 1
+                ? 'inline-block'
+                : 'none';
+
+
+        loadSheet(
+            workbook.SheetNames[0]
+        );
+
+    }
+
+
+
+    /* ==============================
+       CARGAR AUTOMÁTICAMENTE
+       ============================== */
+
+    function cargarConductorAutomatico() {
+
+        fetch('conductor.xlsx')
+
+            .then(function(respuesta) {
+
+                if (!respuesta.ok) {
+
+                    throw new Error(
+                        'No se encontró conductor.xlsx (HTTP ' +
+                        respuesta.status +
+                        ')'
+                    );
+
+                }
+
+                return respuesta.arrayBuffer();
+
+            })
+
+
+            .then(function(buffer) {
+
+                procesarWorkbook(
+                    new Uint8Array(buffer),
+                    'conductor.xlsx'
+                );
+
+            })
+
+
+            .catch(function(error) {
+
+                fileStatus.textContent =
+                    'No se pudo cargar conductor.xlsx automáticamente. ' +
+                    'Selecciónalo manualmente.';
+
+                console.log(error);
+
+            });
+
+    }
+
+
+
+    /* ==============================
+       SELECCIONAR EXCEL MANUALMENTE
+       ============================== */
+
+    fileInput.addEventListener(
+        'change',
+        function(e) {
+
+            const file =
+                e.target.files[0];
+
+
+            if (!file) return;
+
+
+            fileStatus.textContent =
+                'Leyendo ' +
+                file.name +
+                '...';
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(evt) {
+
+                    try {
+
+                        procesarWorkbook(
+                            new Uint8Array(
+                                evt.target.result
+                            ),
+                            file.name
+                        );
+
+
+                        searchInput.focus();
+
+                    } catch (err) {
+
+                        fileStatus.textContent =
+                            'Error al leer el archivo: ' +
+                            err.message;
+
+                    }
+
+                };
+
+
+            reader.readAsArrayBuffer(file);
+
         }
     );
 
-    placas = [];
 
-    filas.forEach(function(fila){
 
-        if(fila[3]){
+    /* ==============================
+       CAMBIAR HOJA
+       ============================== */
 
-            const placa = String(fila[3])
-                .trim()
-                .toUpperCase();
+    sheetSelect.addEventListener(
+        'change',
+        function() {
 
-            if(!placas.includes(placa)){
-                placas.push(placa);
-            }
+            loadSheet(
+                sheetSelect.value
+            );
+
+        }
+    );
+
+
+
+    /* ==============================
+       MOSTRAR RESULTADOS
+       ============================== */
+
+    function renderResults(query) {
+
+
+        resultsEl.innerHTML = '';
+
+
+        const rawQ =
+            query.trim().toUpperCase();
+
+
+        const cleanQ =
+            rawQ.replace(/-/g, '');
+
+
+        if (
+            !records.length ||
+            !rawQ
+        ) {
+
+            resultsLabel.style.display =
+                'none';
+
+            return;
 
         }
 
-    });
 
-    buscador.disabled = false;
 
-    mostrarEstado("ok", "? conductor.xlsx cargado correctamente � " + placas.length + " placas");
+        /* Buscar coincidencias */
 
-    mostrarPlacas(placas);
+        const matches =
+            records
+                .filter(r => {
 
-}
+                    const cleanNum =
+                        r.num
+                            .toUpperCase()
+                            .replace(/-/g, '');
 
-function cargarConductorXlsx(){
 
-    fetch("conductor.xlsx")
-        .then(function(respuesta){
+                    const cleanPlate =
+                        r.plate
+                            .toUpperCase()
+                            .replace(/-/g, '');
 
-            if(!respuesta.ok){
-                throw new Error("No se encontr� conductor.xlsx (HTTP " + respuesta.status + ")");
+
+                    return (
+                        cleanNum.includes(cleanQ) ||
+                        cleanPlate.includes(cleanQ)
+                    );
+
+                })
+                .slice(0, 60);
+
+
+
+        /* Sin resultados */
+
+        if (!matches.length) {
+
+            resultsLabel.style.display =
+                'block';
+
+
+            resultsLabel.textContent =
+                'Resultados';
+
+
+            const empty =
+                document.createElement('div');
+
+
+            empty.className =
+                'empty';
+
+
+            empty.textContent =
+                'Sin coincidencias para "' +
+                query +
+                '"';
+
+
+            resultsEl.appendChild(empty);
+
+
+            return;
+
+        }
+
+
+
+        /* Cantidad de resultados */
+
+        resultsLabel.style.display =
+            'block';
+
+
+        resultsLabel.textContent =
+            matches.length +
+            (
+                matches.length === 1
+                    ? ' resultado'
+                    : ' resultados'
+            );
+
+
+
+        /* ==============================
+           CREAR BOTONES DE PLACAS
+           ============================== */
+
+        matches.forEach(r => {
+
+
+            const btn =
+                document.createElement('button');
+
+
+            btn.type = 'button';
+
+
+            btn.className =
+                'result-btn btn btn-primary text-white d-flex flex-column gap-1 py-3';
+
+
+
+            /*
+             Si existe número:
+             se copia el número.
+
+             Si no existe:
+             se copia la placa.
+            */
+
+            const tieneNumero =
+                !!r.num;
+
+
+            const copyValue =
+                tieneNumero
+                    ? r.num
+                    : r.plate;
+
+
+
+            /* Mostrar la placa y el valor de la columna E si existe */
+
+            const placa =
+                document.createElement('span');
+
+            placa.textContent =
+                r.plate;
+
+            btn.appendChild(placa);
+
+            if (tieneNumero) {
+
+                const numero =
+                    document.createElement('span');
+
+                numero.className =
+                    'small text-info';
+
+                numero.textContent =
+                    'N° ' + r.num;
+
+                btn.appendChild(numero);
+
             }
 
-            return respuesta.arrayBuffer();
 
-        })
-        .then(function(buffer){
 
-            leerPlacasDesdeExcel(buffer);
+            /* Copiar al tocar */
 
-        })
-        .catch(function(error){
+            btn.addEventListener(
+                'click',
+                function() {
 
-            mostrarEstado("error", "? No se pudo cargar conductor.xlsx autom�ticamente");
-            mensaje.innerHTML = "No se pudo cargar conductor.xlsx autom�ticamente. Verifica que est� en la misma carpeta.";
-            mensaje.style.display = "block";
-            console.log(error);
 
-        });
+                    copyText(copyValue);
 
-}
 
-window.addEventListener("load", cargarConductorXlsx);
+                    btn.classList.remove(
+                        'btn-primary'
+                    );
 
-buscador.addEventListener("input", function(){
 
-    const texto = buscador.value
-        .toUpperCase()
-        .trim();
+                    btn.classList.add(
+                        'btn-success'
+                    );
 
-    const filtradas = placas.filter(function(placa){
 
-        return placa.includes(texto);
+                    const contenidoOriginal =
+                        btn.innerHTML;
 
-    });
 
-    mostrarPlacas(filtradas);
+                    btn.textContent =
+                        '¡Copiado!';
 
-});
 
-function mostrarPlacas(lista){
 
-    resultados.innerHTML = "";
+                    setTimeout(() => {
 
-    if(lista.length === 0){
+                        btn.classList.remove(
+                            'btn-success'
+                        );
 
-        resultados.innerHTML = `
-            <div class="sin-resultados">
-                ? No se encontr� ninguna placa
-            </div>
-        `;
 
-        return;
+                        btn.classList.add(
+                            'btn-primary'
+                        );
 
-    }
 
-    lista.forEach(function(placa){
+                        btn.innerHTML =
+                            contenidoOriginal;
 
-        const boton = document.createElement("button");
+                    }, 1000);
 
-        boton.className = "boton-placa";
+                }
+            );
 
-        boton.textContent = placa;
 
-        boton.addEventListener("click", function(){
-
-            copiarPlaca(placa);
+            resultsEl.appendChild(btn);
 
         });
 
-        resultados.appendChild(boton);
-
-    });
-
-}
-
-function copiarPlaca(placa){
-
-    if(navigator.clipboard){
-
-        navigator.clipboard.writeText(placa)
-            .then(function(){
-                mensaje.innerHTML = "? <b>" + placa + "</b> copiada";
-                mensaje.style.display = "block";
-                setTimeout(function(){ mensaje.style.display = "none"; }, 2000);
-            })
-            .catch(function(){
-                fallbackCopy(placa);
-            });
-
-    } else {
-
-        fallbackCopy(placa);
-
     }
 
-}
 
-function fallbackCopy(placa){
 
-    const textarea = document.createElement("textarea");
-    textarea.value = placa;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand("copy");
-    textarea.remove();
+    /* ==============================
+       BUSCAR
+       ============================== */
 
-    mensaje.innerHTML = "? <b>" + placa + "</b> copiada";
-    mensaje.style.display = "block";
+    searchInput.addEventListener(
+        'input',
+        function() {
 
-    setTimeout(function(){
-        mensaje.style.display = "none";
-    }, 2000);
 
-}
+            const formatted =
+                formatPlateInput(
+                    searchInput.value
+                );
+
+
+            searchInput.value =
+                formatted;
+
+
+            renderResults(
+                formatted
+            );
+
+        }
+    );
+
+
+
+    /* ==============================
+       INICIAR
+       ============================== */
+
+    window.addEventListener(
+        'load',
+        cargarConductorAutomatico
+    );
+
+
+})();
 
 </script>
 
+
 </body>
+
 </html>
+
